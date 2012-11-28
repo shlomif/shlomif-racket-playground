@@ -8,6 +8,11 @@
 (define (seq start end)
   (for/list ([i (in-range start end)]) i))
 
+(define (accum-list fn start count)
+  (if (= count 0)
+      '()
+      (cons start (accum-list fn (fn start) (- count 1)))))
+
 (define (my-squares angle-in-degs count)
   (let* ([angle (degrees->radians angle-in-degs)]
          [offset 100]
@@ -15,7 +20,7 @@
          [my-inset (lambda (offset pict) (inset pict offset offset))])
     (my-inset offset
       (apply lt-superimpose
-              (foldl  {lambda (a result)
-                  (cons {scale (rotate (car result) angle)
-                         (sqrt (+ (expt angle 2) (expt (- 1 angle) 2)))} result)}
-               (list (my-inset (- offset) (rectangle size size))) (seq 1 count))))))
+              (accum-list  (lambda (x)
+                  {scale (rotate x angle)
+                         (sqrt (+ (expt angle 2) (expt (- 1 angle) 2)))})
+               (my-inset (- offset) (rectangle size size)) count)))))
