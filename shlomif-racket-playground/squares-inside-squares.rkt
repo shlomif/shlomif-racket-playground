@@ -17,10 +17,13 @@
   (let* ([angle (degrees->radians angle-in-degs)]
          [offset 100]
          [size (* offset 2)]
-         [my-inset (lambda (offset pict) (inset pict offset offset))])
+         [my-inset (lambda (offset pict) (inset pict offset offset))]
+         [scale-ratio (sqrt (+ (expt angle 2) (expt (- 1 angle) 2)))]
+         [transform (lambda (x) {scale (rotate x angle) scale-ratio})]
+         [initial-rect (my-inset (- offset) (rectangle size size))]
+         )
     (my-inset offset
       (apply lt-superimpose
-              (accum-list  (lambda (x)
-                  {scale (rotate x angle)
-                         (sqrt (+ (expt angle 2) (expt (- 1 angle) 2)))})
-               (my-inset (- offset) (rectangle size size)) count)))))
+              (accum-list transform initial-rect count)))))
+
+(define (showsq a c) (show-pict (my-squares a c)))
